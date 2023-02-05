@@ -26,7 +26,7 @@ func PartSort(nums []int, left, right int)int{
 func missingNumber(nums []int) int {
 	QuickSort(nums, 0, len(nums) - 1)
 	return 0
-	
+
 	//mp := make(map[int]int)
 	//for i := 0; i < len(nums) + 1;i++{
 	//	mp[i] = 0
