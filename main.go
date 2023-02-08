@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"net"
 	"strconv"
 )
 
@@ -300,6 +301,7 @@ func findRepeatedDnaSequences(s string) []string {
 	return ret
 }
 
+/*
 //LRU缓存淘汰算法(最近最少使用)
 type LRUCache struct {
 	Capacity int
@@ -309,11 +311,8 @@ type LRUCache struct {
 	Mp       map[int]*DLinkNode
 }
 
-
-
-
 type DLinkNode struct {
-	Key int
+	Key   int
 	Value int
 	Next  *DLinkNode
 	Prev  *DLinkNode
@@ -334,9 +333,9 @@ func Constructor(capacity int) LRUCache {
 }
 
 func (this *LRUCache) Get(key int) int {
-	if cur, ok := this.Mp[key];ok{
+	if cur, ok := this.Mp[key]; ok {
 		//就一个元素的时候不需要移动位置
-		if cur.Next == this.Tail{
+		if cur.Next == this.Tail {
 			return this.Mp[key].Value
 		}
 
@@ -349,7 +348,7 @@ func (this *LRUCache) Get(key int) int {
 		//再建立新的连接关系
 		left := this.Tail.Prev
 		right := this.Tail
-		left.Next= cur
+		left.Next = cur
 		cur.Prev = left
 		cur.Next = right
 		right.Prev = cur
@@ -372,8 +371,8 @@ func (this *LRUCache) Put(key int, value int) {
 
 	var p *DLinkNode
 	q := this.Tail
-	if this.Size == this.Capacity{
-		if this.Size == 1{
+	if this.Size == this.Capacity {
+		if this.Size == 1 {
 
 			p = this.Head
 			//删除最开始的节点的位置信息，因为容量已经满了
@@ -386,8 +385,7 @@ func (this *LRUCache) Put(key int, value int) {
 			node.Next = q
 			q.Prev = node
 
-
-		}else{
+		} else {
 
 			//去掉最开始的首节点
 			pos := this.Head.Next
@@ -406,12 +404,12 @@ func (this *LRUCache) Put(key int, value int) {
 			node.Next = q
 			q.Prev = node
 		}
-	}else{
+	} else {
 		var p *DLinkNode
 		q := this.Tail
-		if this.Size == 0{
+		if this.Size == 0 {
 			p = this.Head
-		}else{
+		} else {
 			p = this.Tail.Prev
 		}
 
@@ -427,12 +425,12 @@ func (this *LRUCache) Put(key int, value int) {
 
 }
 
-
 var obj LRUCache
-func TestLRUCache(str []string, nums [][]int){
+
+func TestLRUCache(str []string, nums [][]int) {
 	ret := make([]string, 0)
 
-	for i, v := range str{
+	for i, v := range str {
 
 		switch v {
 		case "LRUCache":
@@ -450,24 +448,441 @@ func TestLRUCache(str []string, nums [][]int){
 	}
 	fmt.Println(ret)
 }
+*/
+func partition(head *ListNode, x int) *ListNode {
+	if head == nil || head.Next == nil {
+		return head
+	}
+	p := (*ListNode)(nil)
+	q := (*ListNode)(nil)
+	prev := (*ListNode)(nil)
+	cur := (*ListNode)(nil)
+	if head.Val < x {
+		p = head
+		q = head.Next
+	} else {
+		p.Next = head
+		q = head
+	}
+	prev = head
+	cur = head.Next
+	for cur != nil {
+		if cur.Val > x {
+			prev = cur
+			cur = cur.Next
+		}
+		prev.Next = cur.Next
+		//插入
+		if cur != q {
+			cur.Next = q
+		}
+		if p != cur {
+			p.Next = cur
+		}
 
+		p = cur
+		cur = prev.Next
+	}
 
+	return head
 
+	//prev := &ListNode{}
+	//next := &ListNode{}
+	//l := prev
+	//r := next
+	//cur := head
+	//for cur != nil{
+	//	p := cur
+	//	cur = cur.Next
+	//	p.Next = nil
+	//	if p.Val < x{
+	//		prev.Next = p
+	//		prev = prev.Next
+	//	}else{
+	//		next.Next = p
+	//		next = next.Next
+	//	}
+	//}
+	//prev.Next = r.Next
+	//return l.Next
+}
+
+func reverseBetween(head *ListNode, left int, right int) *ListNode {
+	if head == nil || head.Next == nil {
+		return head
+	}
+	count := 0
+	cur := head
+	ret := (*ListNode)(nil)
+	prev := (*ListNode)(nil)
+	back := (*ListNode)(nil)
+	for cur != nil {
+		count++
+		if left > 1 && count == left-1 {
+			prev = cur
+		}
+		if count == left {
+			ret = cur
+		}
+		if count == right {
+			back = cur.Next
+			cur.Next = nil
+			break
+		}
+		cur = cur.Next
+	}
+	first := ret
+	tmp := reverseList(ret)
+	if prev == nil {
+		first.Next = back
+		return tmp
+	}
+	prev.Next = tmp
+	first.Next = back
+
+	return head
+}
+
+func reverseList(head *ListNode) *ListNode {
+	if head == nil || head.Next == nil {
+		return head
+	}
+	ret := reverseList(head.Next)
+	head.Next.Next = head
+	head.Next = nil
+	return ret
+}
+
+func hasCycle(head *ListNode) bool {
+	if head == nil || head.Next == nil {
+		return false
+	}
+	if head.Next == head {
+		return true
+	}
+	fast := head.Next.Next
+	slow := head
+	for fast != nil && fast.Next != nil {
+		if fast == slow {
+			return true
+		}
+		slow = slow.Next
+		fast = fast.Next.Next
+	}
+	return false
+}
+
+func detectCycle(head *ListNode) *ListNode {
+	if head == nil || head.Next == nil {
+		return nil
+	}
+	if head.Next == head {
+		return head
+	}
+	mp := make(map[*ListNode]int)
+	fast := head.Next.Next
+	slow := head
+	//mp[fast] = 1
+	mp[slow] = 1
+	for fast != nil && fast.Next != nil {
+		if fast == slow {
+			if _, ok := mp[slow]; ok {
+				return slow
+			}
+		}
+		slow = slow.Next
+		fast = fast.Next.Next
+		if _, ok := mp[fast]; ok {
+			return fast
+		}
+		if _, ok := mp[slow]; ok {
+			return slow
+		}
+		//mp[fast] = 1
+		mp[slow] = 1
+	}
+	return nil
+	//if !bCycle{
+	//	return nil
+	//}
+	//ret := (*ListNode)(nil)
+	//cur := head
+	//for cur != nil{
+	//	if _, ok := mp[cur];ok{
+	//		return cur
+	//	}
+	//	mp[cur]++
+	//	cur = cur.Next
+	//}
+	//return ret
+}
+
+//实现一个栈
+type MyStack struct {
+	First  *LinkListNode
+	Second *LinkListNode
+	Size   int
+}
+
+type LinkListNode struct {
+	Head *DataNode
+	Tail *DataNode
+}
+
+type DataNode struct {
+	Val  int
+	Next *DataNode
+	Prev *DataNode
+}
+
+func Constructor() MyStack {
+	ret := MyStack{}
+
+	first := &LinkListNode{}
+	nodeHead := &DataNode{}
+	nodetail := &DataNode{}
+	first.Head = nodeHead
+	first.Tail = nodetail
+
+	nodeHead.Next = nodetail
+	nodetail.Prev = nodeHead
+	ret.First = first
+
+	//第二个双向链表记录插入位置的前后节点位置
+	ret.Second = &LinkListNode{}
+
+	ret.Size = 0
+
+	return ret
+}
+
+func (this *MyStack) Push(x int) {
+	p := (*DataNode)(nil)
+	q := (*DataNode)(nil)
+	if this.Size == 0 {
+		p = this.First.Head
+		q = this.First.Tail
+	} else {
+		p = this.Second.Head
+		q = this.Second.Tail
+		//node := &DataNode{}
+		//node.Val = x
+		//p.Next = node
+		//node.Prev = p
+		//
+		//node.Next = q
+		//q.Prev = node
+		//
+		//
+		////已经有层级关系了
+		//this.Second.Head = node
+		//this.Second.Tail = q
+	}
+	node := &DataNode{}
+	node.Val = x
+	p.Next = node
+	node.Prev = p
+	node.Next = q
+	q.Prev = node
+	//已经有层级关系了
+	this.Second.Head = node
+	this.Second.Tail = q
+	this.Size++
+}
+
+func (this *MyStack) Pop() int {
+	ret := this.Second.Head.Val
+
+	p := this.Second.Head.Prev
+	q := this.Second.Tail
+
+	p.Next = q
+	q.Prev = p
+
+	this.Second.Head = p
+
+	this.Size--
+	return ret
+}
+
+func (this *MyStack) Top() int {
+	return this.Second.Head.Val
+}
+
+func (this *MyStack) Empty() bool {
+	if this.Size == 0 {
+		return true
+	}
+	return false
+}
+
+func TestMyStack() {
+	nums := []string{"MyStack", "push", "push", "top", "pop", "empty"}
+	numsList := [][]int{{}, {1}, {2}, {}, {}, {}}
+
+	nums = []string{"MyStack", "push", "push", "pop", "top"}
+	numsList = [][]int{{}, {1}, {2}, {}, {}}
+
+	ret := make([]string, 0)
+	var obj MyStack
+	for i, v := range nums {
+		//if i == 2{
+		//	fmt.Println("11")
+		//}
+
+		switch v {
+		case "MyStack":
+			obj = Constructor()
+			ret = append(ret, "null")
+		case "push":
+			obj.Push(numsList[i][0])
+			ret = append(ret, "null")
+		case "top":
+			x := obj.Top()
+			ret = append(ret, strconv.Itoa(x))
+		case "pop":
+			x := obj.Pop()
+			ret = append(ret, strconv.Itoa(x))
+		case "empty":
+			b := obj.Empty()
+			if b {
+				ret = append(ret, "true")
+			} else {
+				ret = append(ret, "false")
+			}
+		default:
+			fmt.Println("err")
+		}
+	}
+	fmt.Println(ret)
+}
+
+//Definition for a binary tree node.
+type TreeNode struct {
+	Val   int
+	Left  *TreeNode
+	Right *TreeNode
+}
+
+var nums []int
+
+func preorderTraversal(root *TreeNode) []int {
+	nums = make([]int, 0)
+	if root == nil {
+		return nums
+	}
+	preorderTraversalBack(root)
+	return nums
+}
+
+func preorderTraversalBack(node *TreeNode) {
+	if node == nil {
+		return
+	}
+	nums = append(nums, node.Val)
+	preorderTraversalBack(node.Left)
+	preorderTraversalBack(node.Right)
+}
+
+func postorderTraversal(root *TreeNode) []int {
+	nums = make([]int, 0)
+	if root == nil {
+		return nums
+	}
+	postorderTraversalBack(root)
+	return nums
+}
+
+func postorderTraversalBack(node *TreeNode) {
+	if node == nil {
+		return
+	}
+	postorderTraversalBack(node.Left)
+	postorderTraversalBack(node.Right)
+	nums = append(nums, node.Val)
+}
+
+func singleNumbers(nums []int) []int {
+	sum := 0
+	for _, v := range nums {
+		sum ^= v
+	}
+	or := 1
+	for sum^or != 0 {
+		or <<= 1
+	}
+	a := 0
+	b := 0
+	for _, v := range nums {
+		if v^or == 1 {
+			a ^= v
+		} else {
+			b ^= v
+		}
+	}
+	return []int{a, b}
+}
 
 func main() {
-	TestLRUCacheStr := []string{"LRUCache", "put", "put", "get", "put", "get", "put", "get", "get", "get"}
-	TestLRUCacheMp := [][]int{{2}, {1, 1}, {2, 2}, {1}, {3, 3}, {2}, {4, 4}, {1}, {3}, {4}}
-
-	TestLRUCacheStr = []string{"LRUCache","put","get","put","get","get"}
-	TestLRUCacheMp = [][]int{   {1},     {2, 1}, {2}, {3,2}, {2},  {3}}
-
-	TestLRUCacheStr = []string{"LRUCache","put","put","get","put","put","get"}
-	TestLRUCacheMp = [][]int{   {2},    {2, 1}, {2,2}, {2}, {1,1},  {4,1}, {2}}
-
-	TestLRUCache(TestLRUCacheStr, TestLRUCacheMp)
-	return
 
 	{
+		root := &TreeNode{1, nil, &TreeNode{2, &TreeNode{3, nil, nil}, nil}}
+		//fmt.Println(preorderTraversal(root))
+		fmt.Println(postorderTraversal(root))
+		return
+
+		TestMyStack()
+		return
+
+		reverseBetweenList := []int{1, 2, 3, 4, 5}
+		reverseBetweenLeft := 2
+		reverseBetweenRight := 4
+
+		reverseBetweenHead := &ListNode{reverseBetweenList[0], nil}
+
+		cur := reverseBetweenHead
+		for i := 1; i < len(reverseBetweenList); i++ {
+			tmp := &ListNode{reverseBetweenList[i], nil}
+			cur.Next = tmp
+			cur = cur.Next
+		}
+
+		fmt.Println(reverseBetween(reverseBetweenHead, reverseBetweenLeft, reverseBetweenRight))
+		return
+
+		partitionkList := []int{1, 4, 3, 2, 5, 2}
+
+		partitionHead := &ListNode{partitionkList[0], nil}
+
+		cur = partitionHead
+		for i := 1; i < len(partitionkList); i++ {
+			tmp := &ListNode{partitionkList[i], nil}
+			cur.Next = tmp
+			cur = cur.Next
+		}
+
+		partitionk := 3
+		partition(partitionHead, partitionk)
+		return
+
+		//TestLRUCacheStr := []string{"LRUCache", "put", "put", "get", "put", "get", "put", "get", "get", "get"}
+		//TestLRUCacheMp := [][]int{{2}, {1, 1}, {2, 2}, {1}, {3, 3}, {2}, {4, 4}, {1}, {3}, {4}}
+		//
+		//TestLRUCacheStr = []string{"LRUCache", "put", "get", "put", "get", "get"}
+		//TestLRUCacheMp = [][]int{{1}, {2, 1}, {2}, {3, 2}, {2}, {3}}
+		//
+		//TestLRUCacheStr = []string{"LRUCache", "put", "put", "get", "put", "put", "get"}
+		//TestLRUCacheMp = [][]int{{2}, {2, 1}, {2, 2}, {2}, {1, 1}, {4, 1}, {2}}
+		//
+		//TestLRUCache(TestLRUCacheStr, TestLRUCacheMp)
+		//return
+
+		list, err := net.Listen("tcp", ":5001")
+		if err != nil {
+			return
+		}
+		fmt.Println(list)
+
 		findRepeatedDnaSequencesStr := "AAAAACCCCCAAAAACCCCCCAAAAAGGGTTT"
 		findRepeatedDnaSequencesStr = "AAAAAAAAAAA"
 		fmt.Println(findRepeatedDnaSequences(findRepeatedDnaSequencesStr))
